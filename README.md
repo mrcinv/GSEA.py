@@ -1,4 +1,4 @@
-# Gene Set Enrichment Analysis GSEA.py
+# Gene Set Enrichment Analysis GSEA.py [![Build Status](https://travis-ci.org/mrcinv/GSEA.py.svg?branch=master)](https://travis-ci.org/mrcinv/GSEA.py)
 
 Python implementation of Gene Set Enrichment Analysis (GSEA) method as is
 described in this [PNAS article](http://www.pnas.org/content/102/43/15545.abstract).
