@@ -77,4 +77,22 @@ def estimate_P(ES, ES_null):
     P = location/N
     return min(P,1-P)
 
+# Multiple Hypothesis testing
+
+def multiple_hypotesis_testing(D, C, S_sets, p_exp=1, random_sets=1000):
+    """Performs Multiple Hypotesis Testing."""
+    N, k = D.shape
+    # generate random gene sets
+    Pi_sets = []
+    ES = []
+    for i in range(random_sets):
+        Pi_sets.append(tuple(np.random.randint(0,2) for i in range(k)))
+    # calculate enrichment scores
+    for i in range(len(S_sets)):
+        ES.append(enrichment_score(D,C,S, p_exp))
+        for pi in Pi_sets:
+            ES_pi[i].append(enrichment_score(D,pi,S,p_exp))
+    # normalize ES
+
+    # calculate FDRs
 
