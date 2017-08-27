@@ -24,7 +24,11 @@ list *L*.
  - an exponent *p* to control the weight of the step
  - a gene set *S* (an independently obtained set of *N_H* genes)
 
+### Output 
 
+ - Normalized Gene Enrichment Scores for all gene sets
+ - P-values for gene sets
+ 
 ## Instalation
 
 ## Using as a standalone tool
@@ -39,10 +43,29 @@ Example call of the program
 ```
 python3 gsea.py leukemmia.txt pathways.txt
 ```
- 
+
+should produce the following results:
+
+```
+Gene set, normalized enrichment score (NES), p-value
+
+```
+The results can also be piped into a csv file and viewed in a spreadsheet program:
+
+```
+python3 gsea.py leukemmia.txt pathways.txt > es.csv
+```
+
 ## Using as a Library
 
 ``` python
 import gsea
 result = gsea.gsea(profiles, gene_sets)
 ```
+
+## Sample data
+
+You can download the sample data that has been used in the original article 
+[at the Broad Institute download page](http://software.broadinstitute.org/gsea/downloads.jsp).
+
+In the above example, we used *C1* geneset (positional genesets).
