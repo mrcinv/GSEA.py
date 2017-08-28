@@ -19,6 +19,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+import sys, csv
+import numpy as np
 
 def enrichment_score(D, C, S, p_exp=1):
     """Calculates enrichment score (ES) for a given gene expression data.
@@ -44,10 +46,10 @@ def enrichment_score(D, C, S, p_exp=1):
     S_mask = np.zeros(N)
     S_mask[S] = 1
     S_mask = S_mask[L]
-    N_R = sum(abs(r*S_mask)**p)
-    P_hit = cumsum(abs(r*S_mask)**p)/N_R
+    N_R = sum(abs(r*S_mask)**p_exp)
+    P_hit = np.cumsum(abs(r*S_mask)**p_exp)/N_R
     N_H = len(S)
-    P_mis = cumsum((1-S_mask))/(N-N_H)
+    P_mis = np.cumsum((1-S_mask))/(N-N_H)
     idx = np.argmax(abs(P_hit - P_mis))
     return P_hit[idx] - P_mis[idx]
 
@@ -57,10 +59,10 @@ def rank_genes(D,C):
     N, k = D.shape
     rL = []
     for i in range(N):
-        rL.append((corrcoef(D[i,:],C)[0,1],i))
-    rL.sort()
-    r = [x[0] for x in rL]
-    L = [x[1] for x in rL]
+        rL.append(np.corrcoef(D[i,:],C)[0,1])
+    rL = sorted(enumerate(rL), key=lambda x: x[1])
+    r = [x[1] for x in rL]
+    L = [x[0] for x in rL]
     return L, r
 
 # Multiple Hypothesis testing
@@ -79,18 +81,70 @@ def multiple_hypotesis_testing(D, C, S_sets, p_exp=1, random_sets=1000):
     for i in range(l):
         S = S_sets[i]
         ES = enrichment_score(D,C,S,p_exp)
-        ES_pi = [enrichment_score(D,pi,S,p_exp) for pi in Pi_sets]
+        print(ES)
+        ES_pi = np.array([enrichment_score(D,pi,S,p_exp) for pi in Pi_sets])
         # normalize separately positive and negative values
         ES_plus = ES_pi[ES_pi>0]
         ES_minus = ES_pi[ES_pi<0]
-        mean_plus = mean(ES_plus)
-        mean_minus = mean(ES_minus)
+        mean_plus = np.mean(ES_plus)
+        mean_minus = np.mean(ES_minus)
         if ES<0:
             NES[i] = ES/mean_plus
             p_value[i] = sum(ES>ES_plus)/len(ES_plus)
         elif ES>0:
             NES[i] = ES/mean_minus
             p_value[i] = sum(ES<ES_minus)/len(ES_minus)
+    NES_sort = sorted(enumerate(NES),key=lambda x: -x[1])
+    order = [x[0] for x in NES_sort]
+    NES = [x[1] for x in NES_sort]
+    return order,NES,p_value[order]
 
-    return NES,p
+def read_expression_file(file):
+    """Reads a file with expression profiles."""
+    D = []
+    genes = []
+    with open(file) as fp:
+        firstline = fp.readline()
+        classes = firstline.split("\t")[1:]
+        for line in fp.readlines():
+            items = line.split("\t")
+            genes.append(items[0])
+            D.append([int(x) for x in items[1:]])
+    class_a = classes[0]
+    C = [int(c == class_a) for c in classes]
+    D = np.array(D)
+    return genes, D, C
 
+def main(argv=None):
+    """Main program. It reads two files say expressions.txt and genesets.txt
+    and performs GSEA analysis. The output is a list of genesets ordered by their
+    Normalized Enrichment scores with scores and p-values.
+    """
+    if argv==None:
+        argv=sys.argv[1:]
+
+    if len(argv)<2:
+        print("""Performs GSEA analysis on gene expression data for a collection of genesets
+
+        Usage: python3 gsea.py expressions.txt genesets.txt
+        """)
+        return 1
+    genes = []
+    D = []
+    genes, D, C = read_expression_file(argv[0])
+
+    G_sets = []
+    G_set_names = []
+    with open(argv[1]) as fp:
+        for line in fp.readlines():
+            items = line.split("\t")
+            G_set_names.append(items[0:1])
+            G_sets.append([genes.index(g) for g in items[2:] if genes.count(g)>0])
+
+    order, NES, p = multiple_hypotesis_testing(D, C, G_sets)
+    for i in range(len(sets)):
+        print("%s,\t %.2f\t %.5f"([G_set_names[order[i][0]]],NES[i],p[i]))
+
+
+if __name__ == '__main__':
+    sys.exit(main())
