@@ -55,44 +55,36 @@ def rank_genes(D,C):
     profile of interest."""
     return None
 
-def generate_ES_null(D, S, p_exp=1, samples=1000):
-    """Generates distribution of enrichment scores (ES) for randomly assigned
-    phenotipes.
-    """
-    N, k = D.shape
-    ES_null = []
-    for i in range(samples):
-        C = [np.random.randint(0,2) for i in range(k)]
-        ES_null.append(enrichment_score(D,C,S,p_exp))
-    ES_null.sort()
-    return ES_null
 
-def estimate_P(ES, ES_null):
-    """Estimates P-value for a given value of enrichment score (ES)
-    by comparing it with a set of scores ES_null, which was calculated for
-    randomly generated gene sets."""
-
-    n = len(ES_null)
-    location = np.searchsorted(ES_null, ES)
-    P = location/N
-    return min(P,1-P)
 
 # Multiple Hypothesis testing
 
 def multiple_hypotesis_testing(D, C, S_sets, p_exp=1, random_sets=1000):
     """Performs Multiple Hypotesis Testing."""
     N, k = D.shape
+    l = len(S_sets)
     # generate random gene sets
     Pi_sets = []
-    ES = []
+    NES = np.zeros(l)
+    p_value = np.zeros(l)
     for i in range(random_sets):
         Pi_sets.append(tuple(np.random.randint(0,2) for i in range(k)))
-    # calculate enrichment scores
-    for i in range(len(S_sets)):
-        ES.append(enrichment_score(D,C,S, p_exp))
-        for pi in Pi_sets:
-            ES_pi[i].append(enrichment_score(D,pi,S,p_exp))
-    # normalize ES
+    # calculate normalized enrichment scores and p-values
+    for i in range(l):
+        S = S_sets[i]
+        ES = enrichment_score(D,C,S,p_exp)
+        ES_pi = [enrichment_score(D,pi,S,p_exp) for pi in Pi_sets]
+        # normalize separately positive and negative values
+        ES_plus = ES_pi[ES_pi>0]
+        ES_minus = ES_pi[ES_pi<0]
+        mean_plus = mean(ES_plus)
+        mean_minus = mean(ES_minus)
+        if ES<0:
+            NES[i] = ES/mean_plus
+            p_value[i] = sum(ES>ES_plus)/len(ES_plus)
+        elif ES>0:
+            NES[i] = ES/mean_minus
+            p_value[i] = sum(ES<ES_minus)/len(ES_minus)
 
-    # calculate FDRs
+    return NES,p
 
