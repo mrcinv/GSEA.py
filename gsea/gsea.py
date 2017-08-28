@@ -43,19 +43,25 @@ def enrichment_score(D, C, S, p_exp=1):
     L, r = rank_genes(D,C)
     S_mask = np.zeros(N)
     S_mask[S] = 1
+    S_mask = S_mask[L]
     N_R = sum(abs(r*S_mask)**p)
     P_hit = cumsum(abs(r*S_mask)**p)/N_R
     N_H = len(S)
-    P_mis = cumsum((1-S-mask))/(N-N_H)
-    ES = np.amax(P_hit - P_mis)
-    return ES
+    P_mis = cumsum((1-S_mask))/(N-N_H)
+    idx = np.argmax(abs(P_hit - P_mis))
+    return P_hit[idx] - P_mis[idx]
 
 def rank_genes(D,C):
     """Ranks genes in expression dataset according to the correlation with the
     profile of interest."""
-    return None
-
-
+    N, k = D.shape
+    rL = []
+    for i in range(N):
+        rL.append((corrcoef(D[i,:],C)[0,1],i))
+    rL.sort()
+    r = [x[0] for x in rL]
+    L = [x[1] for x in rL]
+    return L, r
 
 # Multiple Hypothesis testing
 
