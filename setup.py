@@ -13,9 +13,10 @@ setup(
     long_description=long_description,
     license='MIT',
     keywords='bioinformatics',
+    setup_requires = ['pytest-runner'],
+    tests_require = ['pytest'],
     install_requires=['numpy>=1.12.0'],
     packages=['gsea'],
-    test_suite='tests',
     scripts= ['bin/gsea'],
     classifiers=[
         'Intended Audience :: Science/Research',
