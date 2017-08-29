@@ -131,12 +131,12 @@ def gsea(D, C, S_sets, p_exp=1, random_sets=1000):
         ES_minus = ES_pi[i,:][ES_pi[i,:]<0]
         mean_plus = np.mean(ES_plus)
         mean_minus = np.mean(ES_minus)
-        if ES[i]<0:
+        if ES[i]>0:
             NES[i] = ES[i]/mean_plus
-            p_value[i] = sum(ES[i]>ES_plus)/len(ES_plus)
-        elif ES[i]>0:
-            NES[i] = ES[i]/mean_minus
-            p_value[i] = sum(ES[i]<ES_minus)/len(ES_minus)
+            p_value[i] = sum(ES_plus>ES[i])/len(ES_plus)
+        elif ES[i]<0:
+            NES[i] = -ES[i]/mean_minus
+            p_value[i] = sum(ES_minus<ES[i])/len(ES_minus)
     NES_sort = sorted(enumerate(NES),key=lambda x: -abs(x[1]))
     order = [x[0] for x in NES_sort]
     NES = [x[1] for x in NES_sort]
