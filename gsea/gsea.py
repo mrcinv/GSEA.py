@@ -19,7 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import sys, csv
 import numpy as np
 
 def enrichment_score(L, r, S, p_exp=1):
@@ -49,9 +48,9 @@ def enrichment_score(L, r, S, p_exp=1):
     # reorder gene set mask
     S_mask = S_mask[L]
     N_R = sum(abs(r*S_mask)**p_exp)
-    P_hit = np.cumsum(abs(r*S_mask)**p_exp)/N_R
+    P_hit = np.cumsum(abs(r*S_mask)**p_exp)/N_R if N_R!=0 else np.zeros_like(S_mask)
     N_H = len(S)
-    P_mis = np.cumsum((1-S_mask))/(N-N_H)
+    P_mis = np.cumsum((1-S_mask))/(N-N_H) if N!=N_H else np.zeros_like(S_mask)
     idx = np.argmax(abs(P_hit - P_mis))
     return P_hit[idx] - P_mis[idx]
 
@@ -97,6 +96,7 @@ def gsea(D, C, S_sets, p_exp=1, random_sets=1000):
     p_exp: exponent parameter to control the weight of the step (defaults to 1)
 
     random_sets: number of randomly generated gene sets
+
 
     Returns:
     --------
