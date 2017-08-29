@@ -114,7 +114,7 @@ def multiple_hypotesis_testing(D, C, S_sets, p_exp=1, random_sets=1000):
     p_value = np.zeros(l)
     NES = np.zeros(l)
     ES = np.zeros(l)
-    ES_pi = np.zeros(random_sets,l)
+    ES_pi = np.zeros((random_sets,l))
     L, r = rank_genes(D, C)
     # enrichment scores for S_i
     for i in range(l):
