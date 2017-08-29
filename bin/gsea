@@ -26,7 +26,7 @@ def read_genesets_file(file, genes):
     with open(file) as fp:
         for line in fp.readlines():
             items = line.split("\t")
-            G_set_names.append(items[0:1])
+            G_set_names.append(items[0:2])
             G_sets.append([genes.index(g) for g in items[2:] if genes.count(g)>0])
     return G_sets, G_set_names
 
@@ -49,10 +49,10 @@ def main(argv=None):
     D = []
     genes, D, C = read_expression_file(argv[0])
     G_sets, G_set_names = read_genesets_file(argv[1],genes)
-
+    print("gene set\tNES\tp-value")
     order, NES, p = gsea(D, C, G_sets)
     for i in range(len(G_sets)):
-        print("%s,\t %.2f\t %.7f"([G_set_names[order[i][0]]],NES[i],p[i]))
+        print("%s\t %.2f\t %.7f" % (G_set_names[order[i]][0],NES[i],p[i]))
 
 
 if __name__ == '__main__':
