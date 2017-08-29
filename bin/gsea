@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+from gsea import multiple_hypothesis_testing
+
+def read_expression_file(file):
+    """Reads a file with the expression profiles."""
+    D = []
+    genes = []
+    with open(file) as fp:
+        firstline = fp.readline()
+        classes = firstline.split("\t")[1:]
+        for line in fp.readlines():
+            items = line.split("\t")
+            genes.append(items[0])
+            D.append([int(x) for x in items[1:]])
+    class_a = classes[0]
+    C = [int(c == class_a) for c in classes]
+    D = np.array(D)
+    return genes, D, C
+
+def main(argv=None):
+    """Main program. It reads two files say expressions.txt and genesets.txt
+    and performs GSEA analysis. The output is a list of genesets ordered by their
+    Normalized Enrichment scores with scores and p-values.
+    """
+    if argv==None:
+        argv=sys.argv[1:]
+
+    if len(argv)<3:
+        print("""Performs GSEA analysis on gene expression data for a collection of gene sets
+
+        Usage: gsea expressions.txt gene_sets.txt
+        """)
+        return 1
+    genes = []
+    D = []
+    genes, D, C = read_expression_file(argv[0])
+
+    G_sets = []
+    G_set_names = []
+    with open(argv[1]) as fp:
+        for line in fp.readlines():
+            items = line.split("\t")
+            G_set_names.append(items[0:1])
+            G_sets.append([genes.index(g) for g in items[2:] if genes.count(g)>0])
+
+    order, NES, p = multiple_hypotesis_testing(D, C, G_sets)
+    for i in range(len(sets)):
+        print("%s,\t %.2f\t %.5f"([G_set_names[order[i][0]]],NES[i],p[i]))
+
+
+if __name__ == '__main__':
+    sys.exit(main())

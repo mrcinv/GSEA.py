@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 description = 'Python implementations of Gene Set Enrichment Analysis(GSEA).'
 
@@ -13,9 +13,10 @@ setup(
     long_description=long_description,
     license='MIT',
     keywords='bioinformatics',
-    install_requires=['numpy>=1.12.0', 'scipy>=0.19.0'],
-    packages=find_packages(),
+    install_requires=['numpy>=1.12.0'],
+    packages=['gsea'],
     test_suite='tests',
+    scripts= ['bin/gsea'],
     classifiers=[
         'Intended Audience :: Science/Research',
         'Development Status :: 3 - Alpha',
