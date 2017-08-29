@@ -27,18 +27,20 @@ def enrichment_score(L, r, S, p_exp=1):
 
     Arguments:
     ---------
-    D: a 2D array with expression data for N genes and k samples
+    L: an ordered list of indexes for N genes
+
+    r: a list of correlations of a gene expression data with phenotypes for N genes
 
     C: a list of classes(phenotypes) for k samples
 
-    S: a list of gene indexes
+    S: a list of gene indexes that belong to a gene set
 
     p_exp: exponent parameter to control the weight of the step (defaults to 1)
 
     Returns:
     -------
 
-    ES: enrichment score
+    ES: enrichment score for the given gene set S
     """
 
     N = len(L)
@@ -54,8 +56,22 @@ def enrichment_score(L, r, S, p_exp=1):
     return P_hit[idx] - P_mis[idx]
 
 def rank_genes(D,C):
-    """Ranks genes in expression dataset according to the correlation with the
-    profile of interest."""
+    """Ranks genes in expression dataset according to the correlation with a
+    phenotype.
+
+    Arguments:
+    ----------
+    D: a 2D array of expression data for N genes and k samples
+
+    C: a list of values 1, if a i-th sample is in the phenotype or 0 otherwise
+
+    Returns:
+    --------
+    L: an ordered list of gene indexes
+
+    r: a ordered list of correlation coefficients
+
+    """
     N, k = D.shape
     rL = []
     for i in range(N):
@@ -68,7 +84,29 @@ def rank_genes(D,C):
 # Multiple Hypothesis testing
 
 def multiple_hypotesis_testing(D, C, S_sets, p_exp=1, random_sets=1000):
-    """Performs Multiple Hypotesis Testing."""
+    """Performs Multiple Hypotesis Testing.
+
+    Arguments:
+    ----------
+    D: a 2D array of expression data for N genes and k sample
+
+    C: a list of values 1, if a i-th sample is in the phenotype or 0 otherwise
+
+    S_sets: a list of variable length of gene indexes that belong to a gene set
+
+    p_exp: exponent parameter to control the weight of the step (defaults to 1)
+
+    random_sets: number of randomly generated gene sets
+
+    Returns:
+    --------
+
+    order: list of gene indexes, ordered by the greatest Normalized Enrichment Scores
+
+    NES: a list of Normalized Enrichment Scores (ordered by absolute value)
+
+    p_value: a list of p-values for the NES
+    """
     N, k = D.shape
     l = len(S_sets)
     # generate random gene sets
@@ -99,13 +137,13 @@ def multiple_hypotesis_testing(D, C, S_sets, p_exp=1, random_sets=1000):
         elif ES[i]>0:
             NES[i] = ES[i]/mean_minus
             p_value[i] = sum(ES[i]<ES_minus)/len(ES_minus)
-    NES_sort = sorted(enumerate(NES),key=lambda x: -x[1])
+    NES_sort = sorted(enumerate(NES),key=lambda x: -abs(x[1]))
     order = [x[0] for x in NES_sort]
     NES = [x[1] for x in NES_sort]
     return order,NES,p_value[order]
 
 def read_expression_file(file):
-    """Reads a file with expression profiles."""
+    """Reads a file with the expression profiles."""
     D = []
     genes = []
     with open(file) as fp:
