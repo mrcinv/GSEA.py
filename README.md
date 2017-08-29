@@ -72,17 +72,16 @@ For a given set of genes *S*, the method calculates *Enrichment Score ES(S)*,
 which shows if the genes from the gene set *S* are at the top or bottom in the
 ordered list of genes *L* or randomly distributed throughout *L*.
 The genes in *L*
-are sorted according the correlation of their expression values with phenotypes.
+are sorted according to the correlation of their expression values with phenotypes.
 
 
 ### Input data
 
  - an *N x k* table *D* of expression data with *N* genes and *k* samples
  - samples are grouped into two classes
- - an exponent *p* to control the weight of the step
  - a collection of gene sets *S* (an independently obtained sets of genes of different sizes)
 
 ### Output 
 
- - Normalized Gene Enrichment Scores for all gene sets
- - P-values for gene sets
+ - Normalized Gene Enrichment Scores for all input gene sets
+ - P-values for all input gene sets
