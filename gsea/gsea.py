@@ -22,7 +22,7 @@
 import sys, csv
 import numpy as np
 
-def enrichment_score(D, C, S, p_exp=1):
+def enrichment_score(L, r, S, p_exp=1):
     """Calculates enrichment score (ES) for a given gene expression data.
 
     Arguments:
@@ -41,10 +41,10 @@ def enrichment_score(D, C, S, p_exp=1):
     ES: enrichment score
     """
 
-    N, k = D.shape
-    L, r = rank_genes(D,C)
+    N = len(L)
     S_mask = np.zeros(N)
     S_mask[S] = 1
+    # reorder gene set mask
     S_mask = S_mask[L]
     N_R = sum(abs(r*S_mask)**p_exp)
     P_hit = np.cumsum(abs(r*S_mask)**p_exp)/N_R
@@ -73,27 +73,32 @@ def multiple_hypotesis_testing(D, C, S_sets, p_exp=1, random_sets=1000):
     l = len(S_sets)
     # generate random gene sets
     Pi_sets = []
-    NES = np.zeros(l)
     p_value = np.zeros(l)
+    NES = np.zeros(l)
+    ES = np.zeros(l)
+    ES_pi = np.zeros(random_sets,l)
+    L, r = rank_genes(D, C)
+    # enrichment scores for S_i
+    for i in range(l):
+        ES[i] = enrichment_score(L,r,S_sets[i],p_exp)
     for i in range(random_sets):
-        Pi_sets.append(tuple(np.random.randint(0,2) for i in range(k)))
+        pi = np.array([np.random.randint(0,2) for i in range(k)])
+        L, r = rank_genes(D,pi)
+        ES_pi[i,:] = [enrichment_score(L,r,S_sets[j],p_exp) for j in range(l)]
+
     # calculate normalized enrichment scores and p-values
     for i in range(l):
-        S = S_sets[i]
-        ES = enrichment_score(D,C,S,p_exp)
-        print(ES)
-        ES_pi = np.array([enrichment_score(D,pi,S,p_exp) for pi in Pi_sets])
         # normalize separately positive and negative values
-        ES_plus = ES_pi[ES_pi>0]
-        ES_minus = ES_pi[ES_pi<0]
+        ES_plus = ES_pi[i,:][ES_pi[i,:]>0]
+        ES_minus = ES_pi[i,:][ES_pi[i,:]<0]
         mean_plus = np.mean(ES_plus)
         mean_minus = np.mean(ES_minus)
-        if ES<0:
-            NES[i] = ES/mean_plus
-            p_value[i] = sum(ES>ES_plus)/len(ES_plus)
-        elif ES>0:
-            NES[i] = ES/mean_minus
-            p_value[i] = sum(ES<ES_minus)/len(ES_minus)
+        if ES[i]<0:
+            NES[i] = ES[i]/mean_plus
+            p_value[i] = sum(ES[i]>ES_plus)/len(ES_plus)
+        elif ES[i]>0:
+            NES[i] = ES[i]/mean_minus
+            p_value[i] = sum(ES[i]<ES_minus)/len(ES_minus)
     NES_sort = sorted(enumerate(NES),key=lambda x: -x[1])
     order = [x[0] for x in NES_sort]
     NES = [x[1] for x in NES_sort]
@@ -123,10 +128,10 @@ def main(argv=None):
     if argv==None:
         argv=sys.argv[1:]
 
-    if len(argv)<2:
+    if len(argv)<3:
         print("""Performs GSEA analysis on gene expression data for a collection of genesets
 
-        Usage: python3 gsea.py expressions.txt genesets.txt
+        Usage: python3 gsea.py expressions.txt gene_sets.txt [number_of_random_sets]
         """)
         return 1
     genes = []
