@@ -83,7 +83,7 @@ def rank_genes(D,C):
 
 # Multiple Hypothesis testing
 
-def multiple_hypotesis_testing(D, C, S_sets, p_exp=1, random_sets=1000):
+def gsea(D, C, S_sets, p_exp=1, random_sets=1000):
     """Performs Multiple Hypotesis Testing.
 
     Arguments:
