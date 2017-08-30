@@ -139,8 +139,8 @@ def gsea(D, C, S_sets, p_exp=1, random_sets=1000):
     # calculate normalized enrichment scores and p-values
     for i in range(l):
         # normalize separately positive and negative values
-        ES_plus = ES_pi[i,:][ES_pi[i,:]>0]
-        ES_minus = ES_pi[i,:][ES_pi[i,:]<0]
+        ES_plus = ES_pi[:,i][ES_pi[:,i]>0]
+        ES_minus = ES_pi[:,i][ES_pi[:,i]<0]
         mean_plus = np.mean(ES_plus)
         mean_minus = np.mean(ES_minus)
         if ES[i]>0:
