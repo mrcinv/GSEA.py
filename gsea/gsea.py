@@ -55,6 +55,7 @@ def enrichment_score(L, r, S, p_exp=1):
     idx = np.argmax(abs(P_hit - P_mis))
     return P_hit[idx] - P_mis[idx]
 
+
 def rank_genes(D,C):
     """Ranks genes in expression dataset according to the correlation with a
     phenotype.
@@ -73,9 +74,19 @@ def rank_genes(D,C):
 
     """
     N, k = D.shape
-    rL = []
-    for i in range(N):
-        rL.append(np.corrcoef(D[i,:],C)[0,1])
+    # way faster than np.corrcoef
+    C = np.array(C)
+    ED = np.mean(D,1)
+    EC = np.mean(C)
+    EDC = np.mean(D*C,1)
+    KOV = EDC-ED*EC
+    sD = (np.mean(D**2,1)-ED**2)**0.5
+    sC = (np.mean(C**2)-EC**2)**0.5
+    rL = KOV/sD/sC
+    # rL = []
+    # for i in range(N):
+    #     rL.append(np.corrcoef(D[i,:],C)[0,1])
+
     rL = sorted(enumerate(rL), key=lambda x: -x[1])
     r = [x[1] for x in rL]
     L = [x[0] for x in rL]
