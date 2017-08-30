@@ -75,7 +75,7 @@ def rank_genes(D,C):
     rL = []
     for i in range(N):
         rL.append(np.corrcoef(D[i,:],C)[0,1])
-    rL = sorted(enumerate(rL), key=lambda x: x[1])
+    rL = sorted(enumerate(rL), key=lambda x: -x[1])
     r = [x[1] for x in rL]
     L = [x[0] for x in rL]
     return L, r
