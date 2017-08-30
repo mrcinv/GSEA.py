@@ -35,8 +35,12 @@ gsea leukemmia.txt pathways.txt
 should produce the following results:
 
 ```
-Gene set	normalized enrichment score (NES)	p-value
-
+gene set	NES	p-value
+MAP00532_Chondroitin_Heparan_sulfate_biosynthesis	 -2.70	 0.0000000
+MAP_kinase_kinase_activity	 -2.20	 0.0140845
+mspPathway	 -2.14	 0.0387597
+pepiPathway	 -2.11	 0.0124481
+anthraxPathway	 -2.02	 0.0095847
 ...
 ```
 
