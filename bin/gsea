@@ -9,9 +9,9 @@ def read_expression_file(file):
     genes = []
     with open(file) as fp:
         firstline = fp.readline()
-        classes = firstline.split("\t")[1:]
+        classes = [c.strip() for c in firstline.split("\t")[1:]]
         for line in fp.readlines():
-            items = line.split("\t")
+            items = [w.strip() for w in line.split("\t")]
             genes.append(items[0])
             D.append([int(x) for x in items[1:]])
     class_a = classes[0]
@@ -25,7 +25,7 @@ def read_genesets_file(file, genes):
     G_set_names = []
     with open(file) as fp:
         for line in fp.readlines():
-            items = line.split("\t")
+            items = [w.strip() for w in line.split("\t")]
             G_set_names.append(items[0:2])
             G_sets.append([genes.index(g) for g in items[2:] if genes.count(g)>0])
     return G_sets, G_set_names
