@@ -56,7 +56,7 @@ gsea leukemmia.txt pathways.txt > es.tsv
 import gsea
 order, NES, p_value = gsea.gsea(D, C, S_sets)
 ```
-
+See [example Jupyter notebook](Leukemia.ipynb) for an ilustration.
 ## Sample data
 
 The sample data that has been used in the original article 
