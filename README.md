@@ -32,7 +32,7 @@ Example call of the program
 gsea leukemmia.txt pathways.txt
 ```
 
-should produce the following results similar to this:
+should produce results similar to this:
 
 ```
 gene set	NES	p-value
