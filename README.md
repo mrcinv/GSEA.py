@@ -29,28 +29,28 @@ files have to be provided
  
 Example call of the program
 ```
-python3 gsea.py leukemmia.txt pathways.txt
+gsea leukemmia.txt pathways.txt
 ```
 
 should produce the following results:
 
 ```
-Gene set, normalized enrichment score (NES), p-value
+Gene set	normalized enrichment score (NES)	p-value
 
 ...
+```
+
+The results can also be piped into a tsv file and viewed in a spreadsheet program:
 
 ```
-The results can also be piped into a csv file and viewed in a spreadsheet program:
-
-```
-python3 gsea.py leukemmia.txt pathways.txt > es.csv
+gsea leukemmia.txt pathways.txt > es.tsv
 ```
 
 ## Using GSEA.py as a Library
 
 ``` python
 import gsea
-result = gsea.multiple_hypotesis_testing(D, C, S_sets)
+order, NES, p_value = gsea.gsea(D, C, S_sets)
 ```
 
 ## Sample data
