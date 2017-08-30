@@ -36,11 +36,15 @@ should produce the following results similar to this:
 
 ```
 gene set	NES	p-value
-MAP00532_Chondroitin_Heparan_sulfate_biosynthesis	 -2.70	 0.0000000
-MAP_kinase_kinase_activity	 -2.20	 0.0140845
-mspPathway	 -2.14	 0.0387597
-pepiPathway	 -2.11	 0.0124481
-anthraxPathway	 -2.02	 0.0095847
+MAP00480_Glutathione_metabolism  -1.84   0.0040404
+DNA_DAMAGE_SIGNALLING    1.83    0.0020080
+MAP00193_ATP_synthesis   -1.82   0.0020040
+MAP00195_Photosynthesis  -1.82   0.0020040
+MAP03070_Type_III_secretion_system       -1.82   0.0020040
+Cell_Cycle       1.74    0.0294695
+ANTI_CD44_UP     -1.74   0.0038835
+ST_Ga13_Pathway  -1.73   0.0100000
+CR_CELL_CYCLE    1.72    0.0187891
 ...
 ```
 
