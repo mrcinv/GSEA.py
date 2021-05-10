@@ -60,7 +60,12 @@ gsea leukemmia.txt pathways.txt > es.tsv
 import gsea
 order, NES, p_value = gsea.gsea(D, C, S_sets)
 ```
+
+`gsea.gsea` also supports parallelization with Python `multiprocessing`. To use multiple cores, pass the `n_jobs` keyword argument.
+To use all available cores, pass `n_jobs = -1`.
+
 See [example Jupyter notebook](Leukemia.ipynb) for an ilustration.
+
 ## Sample data
 
 The sample data that has been used in the original article 
