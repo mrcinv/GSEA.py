@@ -1,3 +1,4 @@
+# from: https://github.com/mrcinv/GSEA.py
 # MIT License
 
 # Copyright (c) 2017 Martin Vuk
@@ -21,6 +22,8 @@
 # SOFTWARE.
 import numpy as np
 import sys
+import multiprocessing
+from functools import partial
 
 
 def enrichment_score(L, r, S, p_exp=1):
@@ -91,9 +94,6 @@ def rank_genes(D, C):
     sD = (np.mean(D**2, 1) - ED**2)**0.5
     sC = (np.mean(C**2) - EC**2)**0.5
     rL = KOV / sD / sC
-    # rL = []
-    # for i in range(N):
-    #     rL.append(np.corrcoef(D[i,:],C)[0,1])
 
     rL = sorted(enumerate(rL), key=lambda x: -x[1])
     r = [x[1] for x in rL]
@@ -101,7 +101,16 @@ def rank_genes(D, C):
     return L, r
 
 
-def gsea(D, C, S_sets, p_exp=1, random_sets=1000):
+def get_rand_es(pi, D, L, r, S_sets, p_exp, n):
+    """Get the enrichment score for a randomized set of class labels"""
+    L, r = rank_genes(D, pi)
+    rand_ES_j = [
+        enrichment_score(L, r, S_sets[j], p_exp) for j in range(n)
+    ]
+    return rand_ES_j
+
+
+def gsea(D, C, S_sets, p_exp=1, random_sets=1000, n_jobs: int=1):
     """Performs Multiple Hypotesis Testing.
 
     Arguments:
@@ -115,6 +124,9 @@ def gsea(D, C, S_sets, p_exp=1, random_sets=1000):
     p_exp: exponent parameter to control the weight of the step (defaults to 1)
 
     random_sets: number of randomly generated gene sets
+    
+    n_jobs: number of threads to use for empirical null computation. setting to -1
+        uses all available threads.
 
 
     Returns:
@@ -137,12 +149,31 @@ def gsea(D, C, S_sets, p_exp=1, random_sets=1000):
     L, r = rank_genes(D, C)
     # enrichment scores for S_i
     for i in range(n):
+        # compute observed enrichment scores
         ES[i] = enrichment_score(L, r, S_sets[i], p_exp)
+        
+    rand_class_labels = []
     for i in range(random_sets):
+        # compute an empirical null by randomizing the class
+        # labels across our samples `random_sets` times
         pi = np.array([np.random.randint(0, 2) for i in range(k)])
-        L, r = rank_genes(D, pi)
-        ES_pi[i, :] = [enrichment_score(L, r, S_sets[j], p_exp)
-                       for j in range(n)]
+        rand_class_labels.append(pi)
+
+    if n_jobs != 1:
+        # use multiprocessing to parallelize empirical null computation
+        # across gene sets        
+        part_rank = partial(
+            get_rand_es, D=D, L=L, r=r, S_sets=S_sets, p_exp=p_exp, n=n
+        )
+        P = multiprocessing.Pool(None if n_jobs==-1 else n_jobs)
+        res = list(P.map(part_rank, rand_class_labels))
+        P.close()
+        ES_pi = np.array(res)
+    else:
+        # process across randomized class labels in serial
+        for i in range(random_sets):
+            pi = rand_class_labels[i]
+            ES_pi[i, :] = get_rand_es(pi, D, L, r, S_sets, p_exp, n)
 
     # calculate normalized enrichment scores and p-values
     for i in range(n):
@@ -153,10 +184,10 @@ def gsea(D, C, S_sets, p_exp=1, random_sets=1000):
         mean_minus = np.mean(ES_minus)
         if ES[i] > 0:
             NES[i] = ES[i] / mean_plus
-            p_value[i] = sum(ES_plus > ES[i]) / len(ES_plus)
+            p_value[i] = float(sum(ES_plus > ES[i])) / float(min(len(ES_plus), 1))
         elif ES[i] < 0:
             NES[i] = -ES[i] / mean_minus
-            p_value[i] = sum(ES_minus < ES[i]) / len(ES_minus)
+            p_value[i] = float(sum(ES_minus < ES[i])) / float(min(len(ES_minus), 1))
     NES_sort = sorted(enumerate(NES), key=lambda x: -abs(x[1]))
     order = [x[0] for x in NES_sort]
     NES = [x[1] for x in NES_sort]
